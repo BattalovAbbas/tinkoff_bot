@@ -25,10 +25,8 @@ bot.onText(/\/stop/, (msg, match) => {
 });
 
 async function start(chatId) {
-    const { accounts } = await api.users.getAccounts({});
+    const portfolio = await getPortfolio();
 
-    const portfolio = await api.operations.getPortfolio({ accountId: accounts[0].id });
-    
     bot.sendMessage(chatId, `Start with ${lib.Helpers.toNumber(portfolio.totalAmountShares)}`);
 
     const unsubscribe = await api.stream.market.lastPrice({
@@ -41,11 +39,15 @@ async function start(chatId) {
       });
 }
 
+async function getPortfolio() {
+  const { accounts } = await api.users.getAccounts({});
+  return api.operations.getPortfolio({ accountId: accounts[0].id });
+}
+
 async function stop(chatId) {
     await api.stream.market.cancel();
-    const { accounts } = await api.users.getAccounts({});
 
-    const portfolio = await api.operations.getPortfolio({ accountId: accounts[0].id });
+    const portfolio = await getPortfolio();
     
     bot.sendMessage(chatId, `Stop with ${lib.Helpers.toNumber(portfolio.totalAmountShares)}`);
 }
